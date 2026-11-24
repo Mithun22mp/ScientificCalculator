@@ -244,6 +244,21 @@ double parse_term() {
             return 0.0;
         }
 
+        // Reject incomplete scientific notation such as 1e, 1e+ or 1e-.
+        if (result.ptr < end && (*result.ptr == 'e' || *result.ptr == 'E')) {
+            const char* exponent = result.ptr + 1;
+
+            if (exponent < end && (*exponent == '+' || *exponent == '-')) {
+                ++exponent;
+            }
+
+            if (exponent >= end ||
+                !std::isdigit(static_cast<unsigned char>(*exponent))) {
+                error_ = ErrorCode::invalid_number;
+                return 0.0;
+            }
+        }
+
         position_ += static_cast<std::size_t>(result.ptr - begin);
         return value;
     }
