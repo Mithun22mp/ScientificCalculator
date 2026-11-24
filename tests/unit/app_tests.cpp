@@ -111,3 +111,17 @@ TEST(CalculatorAppTest, HandlesEndOfInput) {
 
 } // namespace
 } // namespace calculator
+
+TEST(CalculatorAppTest, DoesNotReplaceAnsInsideLargerIdentifiers) {
+    const std::string output = calculator::run_application(
+        "10\n"
+        "ans2\n"
+        "ans_value\n"
+        "exit\n"
+    );
+
+    EXPECT_NE(
+        output.find("Error: Unknown function or constant."),
+        std::string::npos
+    );
+}

@@ -66,10 +66,15 @@ std::optional<std::string> resolve_previous_answer(
 
         const std::size_t start = position;
 
-        while (position < expression.size() &&
-               std::isalpha(
-                   static_cast<unsigned char>(expression[position])
-               )) {
+        while (position < expression.size()) {
+            const unsigned char identifier_character =
+                static_cast<unsigned char>(expression[position]);
+
+            if (!std::isalnum(identifier_character) &&
+                identifier_character != '_') {
+                break;
+            }
+
             ++position;
         }
 
