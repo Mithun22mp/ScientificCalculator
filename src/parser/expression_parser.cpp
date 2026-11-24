@@ -59,6 +59,39 @@ private:
         }
     }
 
+bool starts_implicit_factor() {
+    skip_whitespace();
+
+    if (position_ >= expression_.size()) {
+        return false;
+    }
+
+    const unsigned char current =
+        static_cast<unsigned char>(expression_[position_]);
+
+    // A variable, constant, or function name.
+    if (std::isalpha(current) || current == '(') {
+        return true;
+    }
+
+    // A number following a closing parenthesis.
+    if (std::isdigit(current) || current == '.') {
+        std::size_t previous = position_;
+
+        while (previous > 0 &&
+               std::isspace(
+                   static_cast<unsigned char>(
+                       expression_[previous - 1]))) {
+            --previous;
+        }
+
+        return previous > 0 &&
+               expression_[previous - 1] == ')';
+    }
+
+    return false;
+}
+
     bool consume(char expected) {
         skip_whitespace();
 
@@ -86,33 +119,34 @@ private:
 
         return value;
     }
+double parse_term() {
+    double value = parse_unary();
 
-    double parse_term() {
-        double value = parse_unary();
+    while (error_ == ErrorCode::none) {
+        if (consume('*')) {
+            value *= parse_unary();
+        } else if (consume('/')) {
+            const double divisor = parse_unary();
 
-        while (error_ == ErrorCode::none) {
-            if (consume('*')) {
-                value *= parse_unary();
-            } else if (consume('/')) {
-                const double divisor = parse_unary();
-
-                if (error_ != ErrorCode::none) {
-                    break;
-                }
-
-                if (divisor == 0.0) {
-                    error_ = ErrorCode::division_by_zero;
-                    break;
-                }
-
-                value /= divisor;
-            } else {
+            if (error_ != ErrorCode::none) {
                 break;
             }
-        }
 
-        return value;
+            if (divisor == 0.0) {
+                error_ = ErrorCode::division_by_zero;
+                break;
+            }
+
+            value /= divisor;
+        } else if (starts_implicit_factor()) {
+            value *= parse_unary();
+        } else {
+            break;
+        }
     }
+
+    return value;
+}
 
     double parse_unary() {
         if (consume('+')) {
