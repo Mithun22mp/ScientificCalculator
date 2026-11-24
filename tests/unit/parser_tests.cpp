@@ -204,3 +204,133 @@ TEST_F(ExpressionParserTest, SupportsImplicitMultiplication) {
         1.0
     );
 }
+
+TEST_F(ExpressionParserTest, SupportsScientificNotation) {
+    EXPECT_DOUBLE_EQ(evaluate("1.5e2").value, 150.0);
+    EXPECT_DOUBLE_EQ(evaluate("2.5e-3").value, 0.0025);
+    EXPECT_DOUBLE_EQ(evaluate("1e+3").value, 1000.0);
+}
+
+TEST_F(ExpressionParserTest, HandlesComplexOperatorCombinations) {
+    EXPECT_DOUBLE_EQ(evaluate("2 + 3 * 4^2").value, 50.0);
+    EXPECT_DOUBLE_EQ(evaluate("2^3^2").value, 512.0);
+    EXPECT_DOUBLE_EQ(evaluate("-(2 + 3) * 4").value, -20.0);
+    EXPECT_DOUBLE_EQ(evaluate("2^-2^2").value, 0.0625);
+}
+
+TEST_F(ExpressionParserTest, RejectsMalformedExpressions) {
+    const std::string_view expressions[] = {
+        ".",
+        "1..2",
+        "2**3",
+        "2^^3",
+        "()",
+        "sin()",
+        "2(3",
+        "1e",
+        "2 3"
+    };
+
+    for (const auto expression : expressions) {
+        const auto result = evaluate(expression);
+
+        EXPECT_FALSE(result.success())
+            << "Expression should be rejected: " << expression;
+    }
+}
+
+TEST_F(ExpressionParserTest, HandlesNegativeZeroDivision) {
+    const auto result = evaluate("1 / -0");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::division_by_zero
+    );
+}
+
+TEST_F(ExpressionParserTest, ReportsPowerDomainErrors) {
+    const auto result = evaluate("(-2)^0.5");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::domain_error
+    );
+}
+
+TEST_F(ExpressionParserTest, DetectsArithmeticOverflow) {
+    const auto addition = evaluate("1e308 + 1e308");
+    const auto multiplication = evaluate("1e308 * 1e308");
+
+    EXPECT_FALSE(addition.success());
+    EXPECT_FALSE(multiplication.success());
+
+    EXPECT_EQ(
+        addition.error,
+        calculator::ErrorCode::numeric_overflow
+    );
+
+    EXPECT_EQ(
+        multiplication.error,
+        calculator::ErrorCode::numeric_overflow
+    );
+}
+
+TEST_F(ExpressionParserTest, ReportsPowerOverflow) {
+    const auto result = evaluate("1e308^2");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::numeric_overflow
+    );
+}
+
+TEST_F(ExpressionParserTest, ReportsNumericLiteralOverflow) {
+    const auto result = evaluate("1e9999");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::numeric_overflow
+    );
+}
+
+TEST_F(ExpressionParserTest, RejectsIncompleteSignedScientificNotation) {
+    const auto positive_exponent = evaluate("1e+");
+    const auto negative_exponent = evaluate("1e-");
+
+    EXPECT_FALSE(positive_exponent.success());
+    EXPECT_FALSE(negative_exponent.success());
+
+    EXPECT_EQ(
+        positive_exponent.error,
+        calculator::ErrorCode::invalid_number
+    );
+
+    EXPECT_EQ(
+        negative_exponent.error,
+        calculator::ErrorCode::invalid_number
+    );
+}
+
+TEST_F(ExpressionParserTest, HandlesErrorsInsideDivisionOperands) {
+    const auto result = evaluate("1/(2+)");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::invalid_expression
+    );
+}
+
+TEST_F(ExpressionParserTest, ReportsMissingFunctionClosingParenthesis) {
+    const auto result = evaluate("sqrt(4");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::mismatched_parentheses
+    );
+}
