@@ -1,24 +1,35 @@
+
 cmake_minimum_required(VERSION 3.20)
 
 project(ScientificCalculator
     VERSION 1.0.0
+    DESCRIPTION "A modular C++20 scientific calculator"
     LANGUAGES CXX
 )
+
+include(GNUInstallDirs)
+include(CTest)
+include(CMakePackageConfigHelpers)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(CTest)
-
 option(BUILD_FUZZER "Build the LibFuzzer expression parser target" OFF)
 
 function(configure_warnings target)
     if(MSVC)
-        target_compile_options(${target} PRIVATE /W4 /permissive-)
+        target_compile_options(${target} PRIVATE
+            /W4
+            /permissive-
+        )
     else()
         target_compile_options(${target} PRIVATE
-            -Wall -Wextra -Wpedantic -Wconversion -Wshadow
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Wconversion
+            -Wshadow
         )
     endif()
 endfunction()
@@ -30,7 +41,9 @@ add_library(calculator_core
 )
 
 target_include_directories(calculator_core
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 configure_warnings(calculator_core)
@@ -40,7 +53,9 @@ add_library(calculator_app
 )
 
 target_include_directories(calculator_app
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 target_link_libraries(calculator_app
@@ -53,7 +68,11 @@ add_executable(calculator
     src/main.cpp
 )
 
-target_link_libraries(calculator PRIVATE calculator_app)
+target_link_libraries(calculator
+    PRIVATE calculator_app
+)
+
+configure_warnings(calculator)
 
 if(BUILD_TESTING)
     find_package(GTest REQUIRED)
@@ -66,7 +85,9 @@ if(BUILD_TESTING)
     )
 
     target_link_libraries(calculator_tests
-        PRIVATE calculator_app GTest::gtest_main
+        PRIVATE
+            calculator_app
+            GTest::gtest_main
     )
 
     configure_warnings(calculator_tests)
@@ -92,13 +113,70 @@ if(BUILD_FUZZER)
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
     )
 
-    target_compile_options(expression_parser_fuzz PRIVATE
-        -fsanitize=fuzzer,address,undefined
-        -fno-omit-frame-pointer
-        -Wall -Wextra -Wpedantic -Wconversion -Wshadow
+    target_compile_options(expression_parser_fuzz
+        PRIVATE
+            -fsanitize=fuzzer,address,undefined
+            -fno-omit-frame-pointer
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Wconversion
+            -Wshadow
     )
 
-    target_link_options(expression_parser_fuzz PRIVATE
-        -fsanitize=fuzzer,address,undefined
+    target_link_options(expression_parser_fuzz
+        PRIVATE
+            -fsanitize=fuzzer,address,undefined
     )
 endif()
+
+# Install reusable libraries
+install(TARGETS
+    calculator_core
+    calculator_app
+    EXPORT ScientificCalculatorTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# Install command-line executable
+install(TARGETS calculator
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# Install only actual public C++ headers
+install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING
+        PATTERN "*.hpp"
+)
+
+# Export reusable CMake targets
+install(EXPORT ScientificCalculatorTargets
+    FILE ScientificCalculatorTargets.cmake
+    NAMESPACE ScientificCalculator::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ScientificCalculator
+)
+
+# Generate package configuration
+configure_package_config_file(
+    cmake/ScientificCalculatorConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/ScientificCalculatorConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ScientificCalculator
+)
+
+# Generate package version configuration
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/ScientificCalculatorConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+# Install package configuration files
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/ScientificCalculatorConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/ScientificCalculatorConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ScientificCalculator
+)

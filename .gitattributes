@@ -1,0 +1,3 @@
+
+# Fuzz corpus files are raw input data, not text files.
+tests/fuzz/corpus/** -text -diff
