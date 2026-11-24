@@ -160,3 +160,47 @@ TEST_F(ExpressionParserTest, SupportsWhitespace) {
 }
 
 } // namespace
+TEST_F(ExpressionParserTest, SupportsImplicitMultiplication) {
+    EXPECT_NEAR(
+        evaluate("2pi").value,
+        2.0 * std::acos(-1.0),
+        1e-12
+    );
+
+    EXPECT_DOUBLE_EQ(
+        evaluate("2(3+4)").value,
+        14.0
+    );
+
+    EXPECT_DOUBLE_EQ(
+        evaluate("(2+3)(4+5)").value,
+        45.0
+    );
+
+    EXPECT_NEAR(
+        evaluate("2sin(30)").value,
+        1.0,
+        1e-12
+    );
+
+    EXPECT_DOUBLE_EQ(
+        evaluate("3sqrt(16)").value,
+        12.0
+    );
+
+    EXPECT_NEAR(
+        evaluate("2pi(3)").value,
+        6.0 * std::acos(-1.0),
+        1e-12
+    );
+
+    EXPECT_DOUBLE_EQ(
+        evaluate("(2+3)2").value,
+        10.0
+    );
+
+    EXPECT_DOUBLE_EQ(
+        evaluate("sin(30)2").value,
+        1.0
+    );
+}
