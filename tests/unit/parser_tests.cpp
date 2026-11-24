@@ -276,3 +276,61 @@ TEST_F(ExpressionParserTest, DetectsArithmeticOverflow) {
         calculator::ErrorCode::numeric_overflow
     );
 }
+
+TEST_F(ExpressionParserTest, ReportsPowerOverflow) {
+    const auto result = evaluate("1e308^2");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::numeric_overflow
+    );
+}
+
+TEST_F(ExpressionParserTest, ReportsNumericLiteralOverflow) {
+    const auto result = evaluate("1e9999");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::numeric_overflow
+    );
+}
+
+TEST_F(ExpressionParserTest, RejectsIncompleteSignedScientificNotation) {
+    const auto positive_exponent = evaluate("1e+");
+    const auto negative_exponent = evaluate("1e-");
+
+    EXPECT_FALSE(positive_exponent.success());
+    EXPECT_FALSE(negative_exponent.success());
+
+    EXPECT_EQ(
+        positive_exponent.error,
+        calculator::ErrorCode::invalid_number
+    );
+
+    EXPECT_EQ(
+        negative_exponent.error,
+        calculator::ErrorCode::invalid_number
+    );
+}
+
+TEST_F(ExpressionParserTest, HandlesErrorsInsideDivisionOperands) {
+    const auto result = evaluate("1/(2+)");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::invalid_expression
+    );
+}
+
+TEST_F(ExpressionParserTest, ReportsMissingFunctionClosingParenthesis) {
+    const auto result = evaluate("sqrt(4");
+
+    EXPECT_FALSE(result.success());
+    EXPECT_EQ(
+        result.error,
+        calculator::ErrorCode::mismatched_parentheses
+    );
+}

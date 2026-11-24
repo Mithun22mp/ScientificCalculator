@@ -8,3 +8,7 @@ build/
 build-linux/
 build-sanitize/
 build-release/
+build-coverage/
+coverage.html
+coverage.css
+coverage*.html

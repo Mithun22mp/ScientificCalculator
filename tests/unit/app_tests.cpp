@@ -125,3 +125,34 @@ TEST(CalculatorAppTest, DoesNotReplaceAnsInsideLargerIdentifiers) {
         std::string::npos
     );
 }
+
+TEST(CalculatorAppTest, DisplaysAllCalculationErrorMessages) {
+    const std::string output = calculator::run_application(
+        "2 +\n"
+        "1e+\n"
+        "sqrt(-1)\n"
+        "sqrt(4\n"
+        "1e9999\n"
+        "exit\n"
+    );
+
+    EXPECT_NE(
+        output.find("Error: Invalid expression."),
+        std::string::npos
+    );
+
+    EXPECT_NE(
+        output.find("Error: Mathematical domain error."),
+        std::string::npos
+    );
+
+    EXPECT_NE(
+        output.find("Error: Mismatched parentheses."),
+        std::string::npos
+    );
+
+    EXPECT_NE(
+        output.find("Error: Numeric overflow."),
+        std::string::npos
+    );
+}
