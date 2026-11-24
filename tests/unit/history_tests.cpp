@@ -28,25 +28,18 @@ TEST_F(CalculationHistoryTest, StoresSuccessfulCalculation) {
 }
 
 TEST_F(CalculationHistoryTest, RejectsFailedCalculation) {
-    const CalculationResult result{
-        0.0,
-        ErrorCode::division_by_zero
-    };
+    const CalculationResult result{0.0, ErrorCode::division_by_zero};
 
     EXPECT_FALSE(history.add("10 / 0", result));
     EXPECT_TRUE(history.entries().empty());
 }
 
 TEST_F(CalculationHistoryTest, PreservesCalculationOrder) {
-    EXPECT_TRUE(history.add(
-        "10 + 5",
-        CalculationResult{15.0, ErrorCode::none}
-    ));
+    EXPECT_TRUE(
+        history.add("10 + 5", CalculationResult{15.0, ErrorCode::none}));
 
-    EXPECT_TRUE(history.add(
-        "20 * 2",
-        CalculationResult{40.0, ErrorCode::none}
-    ));
+    EXPECT_TRUE(
+        history.add("20 * 2", CalculationResult{40.0, ErrorCode::none}));
 
     ASSERT_EQ(history.entries().size(), 2U);
 
@@ -55,25 +48,18 @@ TEST_F(CalculationHistoryTest, PreservesCalculationOrder) {
 }
 
 TEST_F(CalculationHistoryTest, ReturnsLatestAnswer) {
-    EXPECT_TRUE(history.add(
-        "10 + 5",
-        CalculationResult{15.0, ErrorCode::none}
-    ));
+    EXPECT_TRUE(
+        history.add("10 + 5", CalculationResult{15.0, ErrorCode::none}));
 
-    EXPECT_TRUE(history.add(
-        "20 * 2",
-        CalculationResult{40.0, ErrorCode::none}
-    ));
+    EXPECT_TRUE(
+        history.add("20 * 2", CalculationResult{40.0, ErrorCode::none}));
 
     ASSERT_TRUE(history.previous_answer().has_value());
     EXPECT_DOUBLE_EQ(*history.previous_answer(), 40.0);
 }
 
 TEST_F(CalculationHistoryTest, ClearRemovesHistoryAndAnswer) {
-    EXPECT_TRUE(history.add(
-        "5 + 5",
-        CalculationResult{10.0, ErrorCode::none}
-    ));
+    EXPECT_TRUE(history.add("5 + 5", CalculationResult{10.0, ErrorCode::none}));
 
     history.clear();
 
@@ -89,42 +75,33 @@ TEST_F(CalculationHistoryTest, RejectsEmptyExpression) {
 }
 
 TEST_F(CalculationHistoryTest, RejectsNaNResult) {
-    const CalculationResult result{
-        std::numeric_limits<double>::quiet_NaN(),
-        ErrorCode::none
-    };
+    const CalculationResult result{std::numeric_limits<double>::quiet_NaN(),
+                                   ErrorCode::none};
 
     EXPECT_FALSE(history.add("invalid", result));
     EXPECT_TRUE(history.entries().empty());
 }
 
 TEST_F(CalculationHistoryTest, RejectsInfiniteResult) {
-    const CalculationResult result{
-        std::numeric_limits<double>::infinity(),
-        ErrorCode::none
-    };
+    const CalculationResult result{std::numeric_limits<double>::infinity(),
+                                   ErrorCode::none};
 
     EXPECT_FALSE(history.add("overflow", result));
     EXPECT_TRUE(history.entries().empty());
 }
 
 TEST_F(CalculationHistoryTest, CanBeReusedAfterClear) {
-    EXPECT_TRUE(history.add(
-        "5 + 5",
-        CalculationResult{10.0, ErrorCode::none}
-    ));
+    EXPECT_TRUE(history.add("5 + 5", CalculationResult{10.0, ErrorCode::none}));
 
     history.clear();
 
-    EXPECT_TRUE(history.add(
-        "20 + 30",
-        CalculationResult{50.0, ErrorCode::none}
-    ));
+    EXPECT_TRUE(
+        history.add("20 + 30", CalculationResult{50.0, ErrorCode::none}));
 
     ASSERT_EQ(history.entries().size(), 1U);
     EXPECT_EQ(history.entries()[0].expression, "20 + 30");
     EXPECT_DOUBLE_EQ(*history.previous_answer(), 50.0);
 }
 
-}
-}
+} // namespace
+} // namespace calculator

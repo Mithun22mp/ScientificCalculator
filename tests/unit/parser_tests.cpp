@@ -12,9 +12,7 @@ class ExpressionParserTest : public ::testing::Test {
 protected:
     calculator::CalculatorEngine engine;
 
-    calculator::CalculationResult evaluate(
-        std::string_view expression
-    ) const {
+    calculator::CalculationResult evaluate(std::string_view expression) const {
         return engine.evaluate(expression);
     }
 };
@@ -45,15 +43,9 @@ TEST_F(ExpressionParserTest, EvaluatesUnaryOperators) {
 }
 
 TEST_F(ExpressionParserTest, EvaluatesMathematicalConstants) {
-    EXPECT_DOUBLE_EQ(
-        evaluate("pi").value,
-        std::acos(-1.0)
-    );
+    EXPECT_DOUBLE_EQ(evaluate("pi").value, std::acos(-1.0));
 
-    EXPECT_DOUBLE_EQ(
-        evaluate("e").value,
-        std::exp(1.0)
-    );
+    EXPECT_DOUBLE_EQ(evaluate("e").value, std::exp(1.0));
 }
 
 TEST_F(ExpressionParserTest, EvaluatesTrigonometricFunctionsInDegrees) {
@@ -77,26 +69,16 @@ TEST_F(ExpressionParserTest, EvaluatesScientificFunctions) {
 }
 
 TEST_F(ExpressionParserTest, EvaluatesNestedExpressions) {
-    EXPECT_DOUBLE_EQ(
-        evaluate("sqrt(16) + 2 * (3 + 4)").value,
-        18.0
-    );
+    EXPECT_DOUBLE_EQ(evaluate("sqrt(16) + 2 * (3 + 4)").value, 18.0);
 
-    EXPECT_NEAR(
-        evaluate("sin(30) + cos(60)").value,
-        1.0,
-        1e-12
-    );
+    EXPECT_NEAR(evaluate("sin(30) + cos(60)").value, 1.0, 1e-12);
 }
 
 TEST_F(ExpressionParserTest, ReportsDivisionByZero) {
     const auto result = evaluate("10 / 0");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::division_by_zero
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::division_by_zero);
 }
 
 TEST_F(ExpressionParserTest, ReportsInvalidExpressions) {
@@ -121,10 +103,7 @@ TEST_F(ExpressionParserTest, ReportsUnknownIdentifiers) {
     const auto result = evaluate("unknown(5)");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::unknown_identifier
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::unknown_identifier);
 }
 
 TEST_F(ExpressionParserTest, ReportsMathematicalDomainErrors) {
@@ -136,20 +115,14 @@ TEST_F(ExpressionParserTest, ReportsMathematicalDomainErrors) {
     EXPECT_FALSE(logarithm.success());
     EXPECT_FALSE(inverse_sine.success());
 
-    EXPECT_EQ(
-        square_root.error,
-        calculator::ErrorCode::domain_error
-    );
+    EXPECT_EQ(square_root.error, calculator::ErrorCode::domain_error);
 }
 
 TEST_F(ExpressionParserTest, ReportsNumericOverflow) {
     const auto result = evaluate("1e308 * 1e308");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::numeric_overflow
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::numeric_overflow);
 }
 
 TEST_F(ExpressionParserTest, SupportsWhitespace) {
@@ -161,48 +134,21 @@ TEST_F(ExpressionParserTest, SupportsWhitespace) {
 
 } // namespace
 TEST_F(ExpressionParserTest, SupportsImplicitMultiplication) {
-    EXPECT_NEAR(
-        evaluate("2pi").value,
-        2.0 * std::acos(-1.0),
-        1e-12
-    );
+    EXPECT_NEAR(evaluate("2pi").value, 2.0 * std::acos(-1.0), 1e-12);
 
-    EXPECT_DOUBLE_EQ(
-        evaluate("2(3+4)").value,
-        14.0
-    );
+    EXPECT_DOUBLE_EQ(evaluate("2(3+4)").value, 14.0);
 
-    EXPECT_DOUBLE_EQ(
-        evaluate("(2+3)(4+5)").value,
-        45.0
-    );
+    EXPECT_DOUBLE_EQ(evaluate("(2+3)(4+5)").value, 45.0);
 
-    EXPECT_NEAR(
-        evaluate("2sin(30)").value,
-        1.0,
-        1e-12
-    );
+    EXPECT_NEAR(evaluate("2sin(30)").value, 1.0, 1e-12);
 
-    EXPECT_DOUBLE_EQ(
-        evaluate("3sqrt(16)").value,
-        12.0
-    );
+    EXPECT_DOUBLE_EQ(evaluate("3sqrt(16)").value, 12.0);
 
-    EXPECT_NEAR(
-        evaluate("2pi(3)").value,
-        6.0 * std::acos(-1.0),
-        1e-12
-    );
+    EXPECT_NEAR(evaluate("2pi(3)").value, 6.0 * std::acos(-1.0), 1e-12);
 
-    EXPECT_DOUBLE_EQ(
-        evaluate("(2+3)2").value,
-        10.0
-    );
+    EXPECT_DOUBLE_EQ(evaluate("(2+3)2").value, 10.0);
 
-    EXPECT_DOUBLE_EQ(
-        evaluate("sin(30)2").value,
-        1.0
-    );
+    EXPECT_DOUBLE_EQ(evaluate("sin(30)2").value, 1.0);
 }
 
 TEST_F(ExpressionParserTest, SupportsScientificNotation) {
@@ -219,17 +165,8 @@ TEST_F(ExpressionParserTest, HandlesComplexOperatorCombinations) {
 }
 
 TEST_F(ExpressionParserTest, RejectsMalformedExpressions) {
-    const std::string_view expressions[] = {
-        ".",
-        "1..2",
-        "2**3",
-        "2^^3",
-        "()",
-        "sin()",
-        "2(3",
-        "1e",
-        "2 3"
-    };
+    const std::string_view expressions[] =
+        {".", "1..2", "2**3", "2^^3", "()", "sin()", "2(3", "1e", "2 3"};
 
     for (const auto expression : expressions) {
         const auto result = evaluate(expression);
@@ -243,20 +180,14 @@ TEST_F(ExpressionParserTest, HandlesNegativeZeroDivision) {
     const auto result = evaluate("1 / -0");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::division_by_zero
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::division_by_zero);
 }
 
 TEST_F(ExpressionParserTest, ReportsPowerDomainErrors) {
     const auto result = evaluate("(-2)^0.5");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::domain_error
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::domain_error);
 }
 
 TEST_F(ExpressionParserTest, DetectsArithmeticOverflow) {
@@ -266,35 +197,23 @@ TEST_F(ExpressionParserTest, DetectsArithmeticOverflow) {
     EXPECT_FALSE(addition.success());
     EXPECT_FALSE(multiplication.success());
 
-    EXPECT_EQ(
-        addition.error,
-        calculator::ErrorCode::numeric_overflow
-    );
+    EXPECT_EQ(addition.error, calculator::ErrorCode::numeric_overflow);
 
-    EXPECT_EQ(
-        multiplication.error,
-        calculator::ErrorCode::numeric_overflow
-    );
+    EXPECT_EQ(multiplication.error, calculator::ErrorCode::numeric_overflow);
 }
 
 TEST_F(ExpressionParserTest, ReportsPowerOverflow) {
     const auto result = evaluate("1e308^2");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::numeric_overflow
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::numeric_overflow);
 }
 
 TEST_F(ExpressionParserTest, ReportsNumericLiteralOverflow) {
     const auto result = evaluate("1e9999");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::numeric_overflow
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::numeric_overflow);
 }
 
 TEST_F(ExpressionParserTest, RejectsIncompleteSignedScientificNotation) {
@@ -304,33 +223,21 @@ TEST_F(ExpressionParserTest, RejectsIncompleteSignedScientificNotation) {
     EXPECT_FALSE(positive_exponent.success());
     EXPECT_FALSE(negative_exponent.success());
 
-    EXPECT_EQ(
-        positive_exponent.error,
-        calculator::ErrorCode::invalid_number
-    );
+    EXPECT_EQ(positive_exponent.error, calculator::ErrorCode::invalid_number);
 
-    EXPECT_EQ(
-        negative_exponent.error,
-        calculator::ErrorCode::invalid_number
-    );
+    EXPECT_EQ(negative_exponent.error, calculator::ErrorCode::invalid_number);
 }
 
 TEST_F(ExpressionParserTest, HandlesErrorsInsideDivisionOperands) {
     const auto result = evaluate("1/(2+)");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::invalid_expression
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::invalid_expression);
 }
 
 TEST_F(ExpressionParserTest, ReportsMissingFunctionClosingParenthesis) {
     const auto result = evaluate("sqrt(4");
 
     EXPECT_FALSE(result.success());
-    EXPECT_EQ(
-        result.error,
-        calculator::ErrorCode::mismatched_parentheses
-    );
+    EXPECT_EQ(result.error, calculator::ErrorCode::mismatched_parentheses);
 }

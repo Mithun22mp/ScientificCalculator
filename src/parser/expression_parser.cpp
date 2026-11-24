@@ -1,8 +1,8 @@
 
 #include "calculator/parser/expression_parser.hpp"
 
-#include <charconv>
 #include <cctype>
+#include <charconv>
 #include <cmath>
 #include <numbers>
 #include <string>
@@ -13,8 +13,7 @@ namespace {
 
 class Parser {
 public:
-    explicit Parser(std::string_view expression)
-        : expression_(expression) {}
+    explicit Parser(std::string_view expression) : expression_(expression) {}
 
     CalculationResult parse() {
         skip_whitespace();
@@ -54,43 +53,39 @@ private:
     void skip_whitespace() {
         while (position_ < expression_.size() &&
                std::isspace(
-                   static_cast<unsigned char>(expression_[position_]))) {
+                   static_cast<unsigned char>(expression_[position_])) != 0) {
             ++position_;
         }
     }
 
-bool starts_implicit_factor() {
-    skip_whitespace();
+    bool starts_implicit_factor() {
+        skip_whitespace();
 
-    if (position_ >= expression_.size()) {
-        return false;
-    }
-
-    const unsigned char current =
-        static_cast<unsigned char>(expression_[position_]);
-
-    // A variable, constant, or function name.
-    if (std::isalpha(current) || current == '(') {
-        return true;
-    }
-
-    // A number following a closing parenthesis.
-    if (std::isdigit(current) || current == '.') {
-        std::size_t previous = position_;
-
-        while (previous > 0 &&
-               std::isspace(
-                   static_cast<unsigned char>(
-                       expression_[previous - 1]))) {
-            --previous;
+        if (position_ >= expression_.size()) {
+            return false;
         }
 
-        return previous > 0 &&
-               expression_[previous - 1] == ')';
-    }
+        const auto current = static_cast<unsigned char>(expression_[position_]);
 
-    return false;
-}
+        // A variable, constant, or function name.
+        if (std::isalpha(current) != 0 || current == '(') {
+            return true;
+        }
+
+        // A number following a closing parenthesis.
+        if (std::isdigit(current) != 0 || current == '.') {
+            std::size_t previous = position_;
+
+            while (previous > 0 && std::isspace(static_cast<unsigned char>(
+                                       expression_[previous - 1])) != 0) {
+                --previous;
+            }
+
+            return previous > 0 && expression_[previous - 1] == ')';
+        }
+
+        return false;
+    }
 
     bool consume(char expected) {
         skip_whitespace();
@@ -119,34 +114,34 @@ bool starts_implicit_factor() {
 
         return value;
     }
-double parse_term() {
-    double value = parse_unary();
+    double parse_term() {
+        double value = parse_unary();
 
-    while (error_ == ErrorCode::none) {
-        if (consume('*')) {
-            value *= parse_unary();
-        } else if (consume('/')) {
-            const double divisor = parse_unary();
+        while (error_ == ErrorCode::none) {
+            if (consume('*')) {
+                value *= parse_unary();
+            } else if (consume('/')) {
+                const double divisor = parse_unary();
 
-            if (error_ != ErrorCode::none) {
+                if (error_ != ErrorCode::none) {
+                    break;
+                }
+
+                if (divisor == 0.0) {
+                    error_ = ErrorCode::division_by_zero;
+                    break;
+                }
+
+                value /= divisor;
+            } else if (starts_implicit_factor()) {
+                value *= parse_unary();
+            } else {
                 break;
             }
-
-            if (divisor == 0.0) {
-                error_ = ErrorCode::division_by_zero;
-                break;
-            }
-
-            value /= divisor;
-        } else if (starts_implicit_factor()) {
-            value *= parse_unary();
-        } else {
-            break;
         }
-    }
 
-    return value;
-}
+        return value;
+    }
 
     double parse_unary() {
         if (consume('+')) {
@@ -208,12 +203,12 @@ double parse_term() {
 
         const char current = expression_[position_];
 
-        if (std::isdigit(static_cast<unsigned char>(current)) ||
+        if (std::isdigit(static_cast<unsigned char>(current)) != 0 ||
             current == '.') {
             return parse_number();
         }
 
-        if (std::isalpha(static_cast<unsigned char>(current))) {
+        if (std::isalpha(static_cast<unsigned char>(current)) != 0) {
             return parse_identifier();
         }
 
@@ -227,12 +222,8 @@ double parse_term() {
 
         double value = 0.0;
 
-        const auto result = std::from_chars(
-            begin,
-            end,
-            value,
-            std::chars_format::general
-        );
+        const auto result =
+            std::from_chars(begin, end, value, std::chars_format::general);
 
         if (result.ec == std::errc::result_out_of_range) {
             error_ = ErrorCode::numeric_overflow;
@@ -253,7 +244,7 @@ double parse_term() {
             }
 
             if (exponent >= end ||
-                !std::isdigit(static_cast<unsigned char>(*exponent))) {
+                std::isdigit(static_cast<unsigned char>(*exponent)) == 0) {
                 error_ = ErrorCode::invalid_number;
                 return 0.0;
             }
@@ -267,19 +258,17 @@ double parse_term() {
         const std::size_t start = position_;
 
         while (position_ < expression_.size()) {
-            const unsigned char character =
+            const auto character =
                 static_cast<unsigned char>(expression_[position_]);
 
-            if (!std::isalnum(character) && character != '_') {
+            if (std::isalnum(character) == 0 && character != '_') {
                 break;
             }
 
             ++position_;
         }
 
-        return std::string(
-            expression_.substr(start, position_ - start)
-        );
+        return std::string(expression_.substr(start, position_ - start));
     }
 
     double parse_identifier() {
@@ -312,10 +301,7 @@ double parse_term() {
         return evaluate_function(name, argument);
     }
 
-    double evaluate_function(
-        const std::string& name,
-        double argument
-    ) {
+    double evaluate_function(const std::string& name, double argument) {
         constexpr double degrees_to_radians =
             std::numbers::pi_v<double> / 180.0;
 
@@ -345,9 +331,8 @@ double parse_term() {
                 return 0.0;
             }
 
-            const double result = name == "asin"
-                ? std::asin(argument)
-                : std::acos(argument);
+            const double result =
+                name == "asin" ? std::asin(argument) : std::acos(argument);
 
             return result / degrees_to_radians;
         }
@@ -362,9 +347,7 @@ double parse_term() {
                 return 0.0;
             }
 
-            return name == "ln"
-                ? std::log(argument)
-                : std::log10(argument);
+            return name == "ln" ? std::log(argument) : std::log10(argument);
         }
 
         if (name == "abs") {
@@ -382,9 +365,8 @@ double parse_term() {
 
 } // namespace
 
-CalculationResult ExpressionParser::evaluate(
-    std::string_view expression
-) const {
+CalculationResult
+ExpressionParser::evaluate(std::string_view expression) const {
     return Parser(expression).parse();
 }
 

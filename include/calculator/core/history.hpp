@@ -17,10 +17,8 @@ struct HistoryEntry {
 
 class CalculationHistory {
 public:
-    [[nodiscard]] bool add(
-        std::string_view expression,
-        const CalculationResult& result
-    );
+    [[nodiscard]] bool add(std::string_view expression,
+                           const CalculationResult& result);
 
     [[nodiscard]] const std::vector<HistoryEntry>& entries() const noexcept;
 
@@ -32,4 +30,4 @@ private:
     std::vector<HistoryEntry> entries_;
 };
 
-}
+} // namespace calculator

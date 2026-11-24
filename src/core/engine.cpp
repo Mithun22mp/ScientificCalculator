@@ -25,9 +25,7 @@ bool CalculationResult::success() const noexcept {
     return error == ErrorCode::none;
 }
 
-CalculationResult CalculatorEngine::add(
-    double a, double b
-) const noexcept {
+CalculationResult CalculatorEngine::add(double a, double b) const noexcept {
     if (!has_finite_inputs(a, b)) {
         return {0.0, ErrorCode::numeric_overflow};
     }
@@ -35,9 +33,8 @@ CalculationResult CalculatorEngine::add(
     return checked_result(a + b);
 }
 
-CalculationResult CalculatorEngine::subtract(
-    double a, double b
-) const noexcept {
+CalculationResult CalculatorEngine::subtract(double a,
+                                             double b) const noexcept {
     if (!has_finite_inputs(a, b)) {
         return {0.0, ErrorCode::numeric_overflow};
     }
@@ -45,9 +42,8 @@ CalculationResult CalculatorEngine::subtract(
     return checked_result(a - b);
 }
 
-CalculationResult CalculatorEngine::multiply(
-    double a, double b
-) const noexcept {
+CalculationResult CalculatorEngine::multiply(double a,
+                                             double b) const noexcept {
     if (!has_finite_inputs(a, b)) {
         return {0.0, ErrorCode::numeric_overflow};
     }
@@ -55,9 +51,7 @@ CalculationResult CalculatorEngine::multiply(
     return checked_result(a * b);
 }
 
-CalculationResult CalculatorEngine::divide(
-    double a, double b
-) const noexcept {
+CalculationResult CalculatorEngine::divide(double a, double b) const noexcept {
     if (!has_finite_inputs(a, b)) {
         return {0.0, ErrorCode::numeric_overflow};
     }
@@ -69,9 +63,8 @@ CalculationResult CalculatorEngine::divide(
     return checked_result(a / b);
 }
 
-CalculationResult CalculatorEngine::evaluate(
-    std::string_view expression
-) const {
+CalculationResult
+CalculatorEngine::evaluate(std::string_view expression) const {
     const ExpressionParser parser;
     return parser.evaluate(expression);
 }

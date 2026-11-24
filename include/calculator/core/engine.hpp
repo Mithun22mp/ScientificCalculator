@@ -25,25 +25,15 @@ struct CalculationResult {
 
 class CalculatorEngine {
 public:
-    [[nodiscard]] CalculationResult add(
-        double a, double b
-    ) const noexcept;
+    [[nodiscard]] CalculationResult add(double a, double b) const noexcept;
 
-    [[nodiscard]] CalculationResult subtract(
-        double a, double b
-    ) const noexcept;
+    [[nodiscard]] CalculationResult subtract(double a, double b) const noexcept;
 
-    [[nodiscard]] CalculationResult multiply(
-        double a, double b
-    ) const noexcept;
+    [[nodiscard]] CalculationResult multiply(double a, double b) const noexcept;
 
-    [[nodiscard]] CalculationResult divide(
-        double a, double b
-    ) const noexcept;
+    [[nodiscard]] CalculationResult divide(double a, double b) const noexcept;
 
-    [[nodiscard]] CalculationResult evaluate(
-        std::string_view expression
-    ) const;
+    [[nodiscard]] CalculationResult evaluate(std::string_view expression) const;
 };
 
-}
+} // namespace calculator
