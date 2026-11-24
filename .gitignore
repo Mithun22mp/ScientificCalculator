@@ -12,3 +12,5 @@ build-coverage/
 coverage.html
 coverage.css
 coverage*.html
+
+build-fuzz/

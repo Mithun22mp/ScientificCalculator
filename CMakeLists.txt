@@ -11,6 +11,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(CTest)
 
+option(BUILD_FUZZER "Build the LibFuzzer expression parser target" OFF)
+
 function(configure_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4 /permissive-)
@@ -71,4 +73,32 @@ if(BUILD_TESTING)
 
     include(GoogleTest)
     gtest_discover_tests(calculator_tests)
+endif()
+
+if(BUILD_FUZZER)
+    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        message(FATAL_ERROR
+            "BUILD_FUZZER requires Clang with LibFuzzer support."
+        )
+    endif()
+
+    add_executable(expression_parser_fuzz
+        tests/fuzz/expression_parser_fuzz.cpp
+        src/parser/expression_parser.cpp
+        src/core/engine.cpp
+    )
+
+    target_include_directories(expression_parser_fuzz
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
+
+    target_compile_options(expression_parser_fuzz PRIVATE
+        -fsanitize=fuzzer,address,undefined
+        -fno-omit-frame-pointer
+        -Wall -Wextra -Wpedantic -Wconversion -Wshadow
+    )
+
+    target_link_options(expression_parser_fuzz PRIVATE
+        -fsanitize=fuzzer,address,undefined
+    )
 endif()
