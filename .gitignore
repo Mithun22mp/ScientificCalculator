@@ -14,3 +14,4 @@ coverage.css
 coverage*.html
 
 build-fuzz/
+build-wasm/

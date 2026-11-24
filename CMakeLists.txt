@@ -180,3 +180,31 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/ScientificCalculatorConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ScientificCalculator
 )
+
+# Browser-compatible WebAssembly build
+if(EMSCRIPTEN)
+    add_executable(calculator_wasm
+        web/wasm/calculator_bindings.cpp
+    )
+
+    target_link_libraries(calculator_wasm
+        PRIVATE calculator_core
+    )
+
+    configure_warnings(calculator_wasm)
+
+    target_link_options(calculator_wasm
+        PRIVATE
+            --bind
+            "-sMODULARIZE=1"
+            "-sEXPORT_ES6=1"
+            "-sALLOW_MEMORY_GROWTH=1"
+            "-sENVIRONMENT=web"
+    )
+
+    set_target_properties(calculator_wasm PROPERTIES
+        OUTPUT_NAME "calculator"
+        SUFFIX ".js"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/web/wasm"
+    )
+endif()
