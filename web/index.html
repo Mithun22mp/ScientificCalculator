@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101827">
+    <meta name="description" content="Scientific Calculator powered by a C++20 WebAssembly engine.">
+    <title>Scientific Calculator</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script type="module" src="./js/app.js"></script>
+</head>
+<body>
+    <main class="app-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon">∑</div>
+                <div>
+                    <h1>Scientific Calculator</h1>
+                    <p>C++20 ENGINE <span>·</span> WEBASSEMBLY</p>
+                </div>
+            </div>
+            <div class="engine-status">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="engineStatus">Loading engine...</span>
+            </div>
+        </header>
+
+        <section class="calculator">
+            <div class="display">
+                <label for="expression">EXPRESSION</label>
+                <input id="expression" type="text"
+                    placeholder="Enter an expression..."
+                    autocomplete="off" spellcheck="false"
+                    aria-label="Calculator expression">
+                <div class="result-label">RESULT</div>
+                <output id="result" aria-live="polite">0</output>
+                <p id="message" role="status">Initializing C++ engine...</p>
+            </div>
+
+            <div class="keypad">
+                <button class="key function" data-insert="sin(">sin</button>
+                <button class="key function" data-insert="cos(">cos</button>
+                <button class="key function" data-insert="tan(">tan</button>
+                <button class="key function" data-insert="sqrt(">√</button>
+                <button class="key function" data-insert="(">(</button>
+                <button class="key function" data-insert=")">)</button>
+
+                <button class="key function" data-insert="asin(">asin</button>
+                <button class="key function" data-insert="acos(">acos</button>
+                <button class="key function" data-insert="atan(">atan</button>
+                <button class="key function" data-insert="log(">log</button>
+                <button class="key function" data-insert="ln(">ln</button>
+                <button class="key function" data-insert="^">xʸ</button>
+
+                <button class="key function" data-insert="pi">π</button>
+                <button class="key function" data-insert="e">e</button>
+                <button class="key function" data-insert="abs(">abs</button>
+                <button class="key function" data-insert="exp(">exp</button>
+                <button class="key function" data-insert="*">×</button>
+                <button class="key function" data-insert="/">÷</button>
+
+                <button class="key" data-insert="7">7</button>
+                <button class="key" data-insert="8">8</button>
+                <button class="key" data-insert="9">9</button>
+                <button class="key function" data-insert="-">−</button>
+                <button class="key function" data-insert="+">+</button>
+                <button class="key action" id="backspace">⌫</button>
+
+                <button class="key" data-insert="4">4</button>
+                <button class="key" data-insert="5">5</button>
+                <button class="key" data-insert="6">6</button>
+                <button class="key" data-insert=".">.</button>
+                <button class="key" data-insert="0">0</button>
+                <button class="key action" id="clear">AC</button>
+
+                <button class="key" data-insert="1">1</button>
+                <button class="key" data-insert="2">2</button>
+                <button class="key" data-insert="3">3</button>
+                <button class="key function" data-insert="sqrt(">√</button>
+                <button class="key function" data-insert="^2">x²</button>
+                <button class="key equals" id="equals">=</button>
+            </div>
+        </section>
+
+        <section class="history-panel">
+            <div class="history-heading">
+                <h2>Recent calculations</h2>
+                <button id="clearHistory" class="text-button">Clear history</button>
+            </div>
+            <ol id="history" class="history-list">
+                <li class="empty-history">Your calculations will appear here.</li>
+            </ol>
+        </section>
+
+        <footer>
+            <span>Scientific Calculator</span>
+            <span>Powered by C++20 + WebAssembly</span>
+        </footer>
+    </main>
+</body>
+</html>
